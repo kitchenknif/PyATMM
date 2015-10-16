@@ -64,9 +64,9 @@ def build_polarization_vector(w, Eps, kx, ky, g, mu):
     e_xz = Eps[0, 2]
 
     p = numpy.asarray(
-        [(w**2*mu*e_xx - kx**2 - g**2)*(w**2*mu*e_zz - kx**2 - ky**2) - (w**2*mu*e_yz + ky*g)**2,
+        [(w**2*mu*e_xx - kx**2 - g**2)*(w**2*mu*e_zz - kx**2 - ky**2) - (w**2*mu*e_yz + ky*g)**2,  # TODO: Possible error in first parenthesis
          (w**2*mu*e_yz + ky*g)*(w**2*mu*e_xy + kx*g) - (w**2*mu*e_xy + kx*ky)*(w**2*mu*e_zz - kx**2 - ky**2),
-         (w**2*mu*e_xy - kx*ky)*(w**2*mu*e_yz + ky*g) - (w**2*mu*e_xz - kx*g)*(w**2*mu*e_yy - kx**2-g**2)] #TODO: Possible error in first parenthesis
+         (w**2*mu*e_xy - kx*ky)*(w**2*mu*e_yz + ky*g) - (w**2*mu*e_xz - kx*g)*(w**2*mu*e_yy - kx**2-g**2)]  # TODO: Possible error in first parenthesis
     )
     p = numpy.divide(p, numpy.sqrt(numpy.dot(p, p)))
     return p

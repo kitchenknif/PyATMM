@@ -2,8 +2,9 @@ __author__ = 'Pavel Dmitriev'
 
 from transferMatrix import *
 
-pi = 0
-A = build_anisotropic_layer_matrix(1.5, 1.5, 1.5, pi/2, pi/2, 0, 1, 0, 0, 200*10**(-6) )
+pi = 3.14
+
+A = build_anisotropic_layer_matrix(e1=1.5, e2=1.5, e3=1.5, theta=pi/2, phi=pi/4, psi=0, w=1, kx=0, ky=0, d=200*10**(-6) )
 
 print(A)
 
