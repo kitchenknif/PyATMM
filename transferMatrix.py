@@ -4,7 +4,7 @@ import numpy
 import numpy.linalg
 
 def build_anisotropic_permittivity(e1, e2, e3):
-    eps = numpy.zeros([3, 3])
+    eps = numpy.zeros([3, 3], dtype=numpy.complex128)
     eps[0, 0] = e1
     eps[1, 1] = e2
     eps[2, 2] = e3
@@ -38,7 +38,7 @@ def build_rotation_matrix(theta, phi, psi):
                 - numpy.sin(psi)*numpy.sin(phi) + numpy.cos(theta)*numpy.cos(phi)*numpy.cos(psi),
                         -numpy.sin(theta)*numpy.cos(phi)],
         [numpy.sin(theta)*numpy.sin(psi), numpy.sin(theta)*numpy.cos(psi), numpy.cos(theta)]
-    ])
+    ], dtype=numpy.float64)
 
     return R
 
@@ -63,11 +63,12 @@ def build_polarization_vector(w, Eps, kx, ky, g, mu):
     e_yz = Eps[1, 2]
     e_xz = Eps[0, 2]
 
+    # TODO: Guaranteed bullshit?
     p = numpy.asarray(
-        [(w**2*mu*e_xx - kx**2 - g**2)*(w**2*mu*e_zz - kx**2 - ky**2) - (w**2*mu*e_yz + ky*g)**2,  # TODO: Possible error in first parenthesis
-         (w**2*mu*e_yz + ky*g)*(w**2*mu*e_xy + kx*g) - (w**2*mu*e_xy + kx*ky)*(w**2*mu*e_zz - kx**2 - ky**2),
-         (w**2*mu*e_xy - kx*ky)*(w**2*mu*e_yz + ky*g) - (w**2*mu*e_xz - kx*g)*(w**2*mu*e_yy - kx**2-g**2)]  # TODO: Possible error in first parenthesis
-    )
+        [(w**2*e_yy - kx**2 - g**2)*(w**2*e_zz - kx**2 - ky**2) - (w**2*e_yz + ky*g)**2,
+         (w**2*e_yz + ky*g)*(w**2*e_xz + kx*g) - (w**2*e_xy + kx*ky)*(w**2*e_zz - kx**2 - ky**2),
+         (w**2*e_xy + kx*ky)*(w**2*e_yz + ky*g) - (w**2*e_xz + kx*g)*(w**2*e_yy - kx**2 - g**2)],
+        dtype=numpy.complex128)
     p = numpy.divide(p, numpy.sqrt(numpy.dot(p, p)))
     return p
 
@@ -121,43 +122,44 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
     p = [build_polarization_vector(w, Eps, kx, ky, g, mu) for g in gamma]
     q = [(c/(w*mu))*numpy.cross([kx, ky, gi], pi) for gi, pi in zip(gamma, p)]
 
-    return p, gamma, Eps
+    #return p, gamma, Eps
 
-    # #
-    # # Tests
-    # #
-    # #vec = numpy.dot(Eps, p[0])
-    # #print( numpy.dot(vec, [kx, ky, gamma[0]]) )
-    # #
-    # #
-    # #
     #
-    # #
-    # # Build boundary transition matrix
-    # #
-    # D = numpy.asarray(
-    #     [
-    #         [p[0][0], p[1][0], p[2][0], p[3][0]],
-    #         [q[0][1], q[1][1], q[2][1], q[3][1]],
-    #         [p[0][1], p[1][1], p[2][1], p[3][1]],
-    #         [q[0][0], q[1][0], q[2][0], q[3][0]]
-    #     ]
-    # )
+    # Tests
     #
-    # #
-    # # Build propagation matrix
-    # #
-    # P = numpy.asarray(
-    #     [
-    #         [numpy.exp(-1j*gamma[0]*d), 0, 0, 0],
-    #         [0, numpy.exp(-1j*gamma[1]*d), 0, 0],
-    #         [0, 0, numpy.exp(-1j*gamma[2]*d), 0],
-    #         [0, 0, 0, numpy.exp(-1j*gamma[3]*d)]
-    #     ]
-    # )
+    #vec = numpy.dot(Eps, p[0])
+    #print( numpy.dot(vec, [kx, ky, gamma[0]]) )
     #
-    # #
-    # # Multiply matricies
-    # #
-    # #LayerMatrix = numpy.dot(numpy.linalg.inv(D), numpy.dot(P, D))
-    # #return LayerMatrix
+    #
+    #
+
+    #
+    # Build boundary transition matrix
+    #
+    D = numpy.asarray(
+        [
+            [p[0][0], p[1][0], p[2][0], p[3][0]],
+            [q[0][1], q[1][1], q[2][1], q[3][1]],
+            [p[0][1], p[1][1], p[2][1], p[3][1]],
+            [q[0][0], q[1][0], q[2][0], q[3][0]]
+        ], dtype=numpy.complex128
+    )
+    print(D)
+
+    #
+    # Build propagation matrix
+    #
+    P = numpy.asarray(
+        [
+            [numpy.exp(-1j*gamma[0]*d), 0, 0, 0],
+            [0, numpy.exp(-1j*gamma[1]*d), 0, 0],
+            [0, 0, numpy.exp(-1j*gamma[2]*d), 0],
+            [0, 0, 0, numpy.exp(-1j*gamma[3]*d)]
+        ], dtype=numpy.complex128
+    )
+
+    #
+    # Multiply matricies
+    #
+    LayerMatrix = numpy.dot(numpy.linalg.inv(D), numpy.dot(P, D))
+    return LayerMatrix
