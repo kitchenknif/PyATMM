@@ -116,39 +116,48 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
     # Build polarization vectors
     #
     mu = 1
-    c = 3*10**9 # m/c
+    c = 1 # m/c
 
     p = [build_polarization_vector(w, Eps, kx, ky, g, mu) for g in gamma]
     q = [(c/(w*mu))*numpy.cross([kx, ky, gi], pi) for gi, pi in zip(gamma, p)]
 
+    return p, gamma, Eps
 
+    # #
+    # # Tests
+    # #
+    # #vec = numpy.dot(Eps, p[0])
+    # #print( numpy.dot(vec, [kx, ky, gamma[0]]) )
+    # #
+    # #
+    # #
     #
-    # Build boundary transition matrix
+    # #
+    # # Build boundary transition matrix
+    # #
+    # D = numpy.asarray(
+    #     [
+    #         [p[0][0], p[1][0], p[2][0], p[3][0]],
+    #         [q[0][1], q[1][1], q[2][1], q[3][1]],
+    #         [p[0][1], p[1][1], p[2][1], p[3][1]],
+    #         [q[0][0], q[1][0], q[2][0], q[3][0]]
+    #     ]
+    # )
     #
-    D = numpy.asarray(
-        [
-            [p[0][0], p[1][0], p[2][0], p[3][0]],
-            [q[0][1], q[1][1], q[2][1], q[3][1]],
-            [p[0][1], p[1][1], p[2][1], p[3][1]],
-            [q[0][0], q[1][0], q[2][0], q[3][0]]
-        ]
-    )
-
+    # #
+    # # Build propagation matrix
+    # #
+    # P = numpy.asarray(
+    #     [
+    #         [numpy.exp(-1j*gamma[0]*d), 0, 0, 0],
+    #         [0, numpy.exp(-1j*gamma[1]*d), 0, 0],
+    #         [0, 0, numpy.exp(-1j*gamma[2]*d), 0],
+    #         [0, 0, 0, numpy.exp(-1j*gamma[3]*d)]
+    #     ]
+    # )
     #
-    # Build propagation matrix
-    #
-    P = numpy.asarray(
-        [
-            [numpy.exp(-1j*gamma[0]*d), 0, 0, 0],
-            [0, numpy.exp(-1j*gamma[1]*d), 0, 0],
-            [0, 0, numpy.exp(-1j*gamma[2]*d), 0],
-            [0, 0, 0, numpy.exp(-1j*gamma[3]*d)]
-        ]
-    )
-
-    #
-    # Multiply matricies
-    #
-    LayerMatrix = numpy.dot(numpy.linalg.inv(D), numpy.dot(P, D))
-
-    return LayerMatrix
+    # #
+    # # Multiply matricies
+    # #
+    # #LayerMatrix = numpy.dot(numpy.linalg.inv(D), numpy.dot(P, D))
+    # #return LayerMatrix
