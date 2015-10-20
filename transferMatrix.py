@@ -113,6 +113,11 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
     coeffs = [a, b, c, d, e]
     gamma = numpy.roots(coeffs)
 
+    #TODO: Hack needs fixing
+    tmp = gamma[2]
+    gamma[2] = gamma[1]
+    gamma[1] = tmp
+
     #
     # Build polarization vectors
     #
@@ -120,7 +125,9 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
     c = 1 # m/c
 
     p = [build_polarization_vector(w, Eps, kx, ky, g, mu) for g in gamma]
+    print("P:", numpy.real(p))
     q = [(c/(w*mu))*numpy.cross([kx, ky, gi], pi) for gi, pi in zip(gamma, p)]
+    print("Q:", numpy.real(q))
 
     #return p, gamma, Eps
 
@@ -144,7 +151,7 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
             [q[0][0], q[1][0], q[2][0], q[3][0]]
         ], dtype=numpy.complex128
     )
-    print(D)
+    print("D:", numpy.real(D))
 
     #
     # Build propagation matrix
@@ -161,5 +168,19 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
     #
     # Multiply matricies
     #
-    LayerMatrix = numpy.dot(numpy.linalg.inv(D), numpy.dot(P, D))
-    return LayerMatrix
+    LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
+    #return LayerMatrix
+    return D
+
+
+def solve_transfer_matrix(M):
+    r_ss = (M[1, 0]*M[2, 2] - M[1, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    r_sp = (M[3, 0]*M[2, 2] - M[3, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    r_ps = (M[0, 0]*M[1, 2] - M[1, 0]*M[0, 2]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    r_pp = (M[0, 0]*M[3, 2] - M[3, 0]*M[0, 2]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    t_ss = M[2, 2] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    t_sp = -M[2, 0] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    t_ps = -M[0, 2] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+    t_pp = M[0, 0] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
+
+    return r_ss, r_sp, r_ps, r_pp, t_ss, t_sp, t_ps, t_pp
