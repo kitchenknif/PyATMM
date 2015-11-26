@@ -8,12 +8,11 @@ w = 1
 d = 5
 
 e_o = 1
-e_e = 5
+e_e = 2
 kx = 0
-ky = 0.15
+ky = 0
 opticAxis = [0., 1., 0.]
-
-#print(build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis))
+print(build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis))
 
 
 ran = np.linspace(0, w, 100, endpoint=False)
