@@ -41,6 +41,9 @@ def solve_axially_aligned_eigenmodes(e_1, e_2, e_3, w, kx, ky):
 
 
 def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])):
+    mu = 1.
+    c = 299792458.  # m/c
+
     #
     # Solve for eigenmodes
     #   Solve quartic equation A*kz**4 + B*kz**3 + C*kz**2 + D*kz + E
@@ -55,8 +58,6 @@ def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])
     #
     # Build polarization vectors
     #
-    mu = 1
-    c = 1 # m/c
 
     p = axially_aligned_uniaxial_polarizations(w, e_o, e_e, kx, ky, gamma, opticAxis)
     #[print("P:", pi) for pi in p]
@@ -108,16 +109,3 @@ def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])
     LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
     #return LayerMatrix
     return D
-
-
-def solve_transfer_matrix(M):
-    r_ss = (M[1, 0]*M[2, 2] - M[1, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    r_sp = (M[3, 0]*M[2, 2] - M[3, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    r_ps = (M[0, 0]*M[1, 2] - M[1, 0]*M[0, 2]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    r_pp = (M[0, 0]*M[3, 2] - M[3, 0]*M[0, 2]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    t_ss = M[2, 2] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    t_sp = -M[2, 0] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    t_ps = -M[0, 2] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-    t_pp = M[0, 0] / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
-
-    return r_ss, r_sp, r_ps, r_pp, t_ss, t_sp, t_ps, t_pp
