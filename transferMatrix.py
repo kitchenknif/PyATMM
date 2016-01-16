@@ -174,6 +174,9 @@ def build_anisotropic_layer_matrix(e1, e2, e3, theta, phi, psi, w, kx, ky, d):
 
 
 def solve_transfer_matrix(M):
+
+    denom = M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0]
+
     r_ss = (M[1, 0]*M[2, 2] - M[1, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
     r_sp = (M[3, 0]*M[2, 2] - M[3, 2]*M[2, 0]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])
     r_ps = (M[0, 0]*M[1, 2] - M[1, 0]*M[0, 2]) / (M[0, 0]*M[2, 2] - M[0, 2]*M[2, 0])

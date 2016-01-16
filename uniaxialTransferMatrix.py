@@ -26,16 +26,16 @@ def axially_aligned_uniaxial_polarizations(w, e_o, e_e, kx, ky, kz, opticAxis):
 
 
 def solve_axially_aligned_eigenmodes(e_1, e_2, e_3, w, kx, ky):
-    kz_4 =(e_3)
+    kz_4 = (e_3)
 
     kz_2 = (-e_1*e_3*w**2 + e_1*kx*2 - e_2*e_3*w**2 + e_2*ky**2 + e_3*kx**2 + e_3*ky**2)
 
-    kz_0 = (e_1*e_2*e_3*w**4 - e_1*e_2*w**2*kx**2 -e_1*e_2*w**2*ky**2 -e_1*e_3*w**2*kx**2 +e_1*kx**4
-                 +e_1*kx**2*ky**2 -e_2*e_3*w**2*ky**2 +e_2*kx**2*ky**2 +e_2*ky**4)
+    kz_0 = (e_1*e_2*e_3*w**4 - e_1*e_2*w**2*kx**2 - e_1*e_2*w**2*ky**2 - e_1*e_3*w**2*kx**2 + e_1*kx**4
+                 + e_1*kx**2*ky**2 - e_2*e_3*w**2*ky**2 + e_2*kx**2*ky**2 + e_2*ky**4)
 
     # biquadratic equation
-    kz2_1 = (1/2)*(-kz_2 + numpy.sqrt(kz_2**2 - 4*kz_4*kz_0, dtype=numpy.complex128))
-    kz2_2 = (1/2)*(-kz_2 - numpy.sqrt(kz_2**2 - 4*kz_4*kz_0, dtype=numpy.complex128))
+    kz2_1 = (-kz_2 + numpy.sqrt(kz_2**2 - 4*kz_4*kz_0))/2.
+    kz2_2 = (-kz_2 - numpy.sqrt(kz_2**2 - 4*kz_4*kz_0))/2.
 
     return [numpy.sqrt(kz2_1), -numpy.sqrt(kz2_1), numpy.sqrt(kz2_2), -numpy.sqrt(kz2_2)]
 
@@ -50,7 +50,17 @@ def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])
     #   Coefficients from Determinant of matrix
     #   [(w/c)**2 * E + inner(k, k) * I + outer(k, k)]
 
-    gamma = solve_axially_aligned_eigenmodes(e_o, e_o, e_e, w, kx, ky)
+    # For now optic axis should be aligned to main axes
+    assert numpy.allclose(opticAxis, [0, 0, 1]) \
+           or numpy.allclose(opticAxis, [0, 1, 0]) \
+           or numpy.allclose(opticAxis, [1, 0, 0])
+    # In general, as long as k-vector and optic axis are not colinear, this should work
+    if opticAxis[0] != 0:
+        gamma = solve_axially_aligned_eigenmodes(e_e, e_o, e_o, w, kx, ky)
+    elif opticAxis[1] != 0:
+        gamma = solve_axially_aligned_eigenmodes(e_o, e_e, e_o, w, kx, ky)
+    elif opticAxis[2] != 0:
+        gamma = solve_axially_aligned_eigenmodes(e_o, e_o, e_e, w, kx, ky)
     k = [numpy.asarray([kx, ky, g]) for g in gamma]
 
     #[print("kz:", kz) for kz in gamma]

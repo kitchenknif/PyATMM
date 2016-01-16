@@ -28,7 +28,53 @@ def build_isotropic_layer_matrix(eps, w, kx, ky, d):
     mu = 1.
     c = 299792458.  # m/c
 
-    mod_kz = numpy.sqrt(c/w - kx**2 - ky**2)
+    mod_kz = numpy.sqrt((c/w)**2 - kx**2 - ky**2)
+    gamma = [mod_kz, -mod_kz, mod_kz, -mod_kz]
+    k = [numpy.asarray([kx, ky, g]) for g in gamma]
+
+    #
+    # Build polarization vectors
+    #
+
+    p = isotropic_polarizations(w, eps, kx, ky, gamma)
+    q = [(c/(w*mu))*numpy.cross(ki, pi) for ki, pi in zip(k, p)]
+
+    #
+    # Build boundary transition matrix
+    #
+    D = numpy.asarray(
+        [
+            [p[0][0], p[1][0], p[2][0], p[3][0]],
+            [q[0][1], q[1][1], q[2][1], q[3][1]],
+            [p[0][1], p[1][1], p[2][1], p[3][1]],
+            [q[0][0], q[1][0], q[2][0], q[3][0]]
+        ], dtype=numpy.complex128
+    )
+
+    #
+    # Build propagation matrix
+    #
+    P = numpy.asarray(
+        [
+            [numpy.exp(-1j*gamma[0]*d), 0, 0, 0],
+            [0, numpy.exp(-1j*gamma[1]*d), 0, 0],
+            [0, 0, numpy.exp(-1j*gamma[2]*d), 0],
+            [0, 0, 0, numpy.exp(-1j*gamma[3]*d)]
+        ], dtype=numpy.complex128
+    )
+
+    #
+    # Multiply matricies
+    #
+    LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
+    return LayerMatrix
+    #return D
+
+def build_isotropic_bounding_layer_matrix(eps, w, kx, ky, d):
+    mu = 1.
+    c = 299792458.  # m/c
+
+    mod_kz = numpy.sqrt((c/w)**2 - kx**2 - ky**2)
     gamma = [mod_kz, -mod_kz, mod_kz, -mod_kz]
     k = [numpy.asarray([kx, ky, g]) for g in gamma]
 
