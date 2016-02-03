@@ -11,14 +11,14 @@ c = 299792458  # m/c
 
 w = 500 * 10 **12
 l = 2*np.pi*c / w
-ran_kx = np.linspace(0, (w/c)*0.99, 100, endpoint=False)
+angle = np.linspace(0, 90, 200, endpoint=False)
+ran_kx = (w/c) * np.sin(np.deg2rad(angle))
 
 eps_1 = 2.25
 n_1 = np.sqrt(eps_1)
 
 ky = 0
 
-refl0 = []
 refl_p = []
 refl_s = []
 for kx in ran_kx:
@@ -48,14 +48,14 @@ for kx in ran_kx:
     assert np.isclose(r_ps, 0)
 
 #PyATMM
-plt.plot(ran_kx, a_refl_p)
-plt.plot(ran_kx, a_refl_s)
+plt.plot(angle, a_refl_p)
+plt.plot(angle, a_refl_s)
 #plt.plot(ran_l*10**9, sum)
 
 #PyTMM
 #plt.plot(ran_l*10**9, refl0, 'o')
-plt.plot(ran_kx, refl_p, '+')
-plt.plot(ran_kx, refl_s, '+')
+plt.plot(angle, refl_p, '+')
+plt.plot(angle, refl_s, '+')
 
 
 plt.xlabel("kx, $m^{-1}$")

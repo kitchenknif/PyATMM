@@ -2,17 +2,18 @@ __author__ = 'Pavel Dmitriev'
 
 import numpy
 import numpy.linalg
+import isotropicTransferMatrix
 
 def axially_aligned_uniaxial_polarizations(w, e_o, e_e, kx, ky, kz, opticAxis):
 
     # For now optic axis should be aligned to main axes
-    assert numpy.allclose(opticAxis, [0, 0, 1]) \
-           or numpy.allclose(opticAxis, [0, 1, 0]) \
-           or numpy.allclose(opticAxis, [1, 0, 0])
+    #assert numpy.allclose(opticAxis, [0, 0, 1]) \
+    #       or numpy.allclose(opticAxis, [0, 1, 0]) \
+    #       or numpy.allclose(opticAxis, [1, 0, 0])
     # In general, as long as k-vector and optic axis are not colinear, this should work
     assert all(not numpy.allclose(opticAxis, [kx, ky, numpy.abs(g)]) for g in kz)
 
-    kap = [ numpy.asarray([kx, ky, g]) for g in kz ]
+    kap = [numpy.asarray([kx, ky, g]) for g in kz]
     kap = [numpy.divide(kap_i, numpy.sqrt(numpy.dot(kap_i, kap_i))) for kap_i in kap ]
 
     p_1 = numpy.cross(opticAxis, kap[0])
@@ -25,72 +26,40 @@ def axially_aligned_uniaxial_polarizations(w, e_o, e_e, kx, ky, kz, opticAxis):
     return p
 
 
-def solve_axially_aligned_eigenmodes(e_1, e_2, e_3, w, kx, ky):
-    kz_4 = (e_3)
+def build_uniaxial_transmitted_wavevectors(e_o, e_e, w, kx, ky, opticAxis=([0., 1., 0.])):
+    mu = 1.
+    c = 299792458.  # m/c
 
-    kz_2 = (-e_1*e_3*w**2 + e_1*kx*2 - e_2*e_3*w**2 + e_2*ky**2 + e_3*kx**2 + e_3*ky**2)
+    nu = (e_e - e_o)/e_o
+    k_par = numpy.sqrt(kx**2 + ky**2)
+    k_0 = w/c
+    opt_par = numpy.sqrt(opticAxis[0]**2 + opticAxis[1]**2)
+    opt_per = numpy.dot(opticAxis, [0, 0, 1])
 
-    kz_0 = (e_1*e_2*e_3*w**4 - e_1*e_2*w**2*kx**2 - e_1*e_2*w**2*ky**2 - e_1*e_3*w**2*kx**2 + e_1*kx**4
-                 + e_1*kx**2*ky**2 - e_2*e_3*w**2*ky**2 + e_2*kx**2*ky**2 + e_2*ky**4)
+    mod_kz_ord = numpy.sqrt(e_o*(w/c)**2 - kx**2 - ky**2)
+    mod_kz_extraord = (1/(1 + nu*opt_per**2))*(-nu*opt_per*opt_par
+                                                + numpy.sqrt(e_o*k_0**2*(1+nu)*(1+nu*opt_per**2)
+                                                    -k_par**2*(1+nu*(opt_per**2 + opt_par**2))))
 
-    # biquadratic equation
-    kz2_1 = (-kz_2 + numpy.sqrt(kz_2**2 - 4*kz_4*kz_0))/2.
-    kz2_2 = (-kz_2 - numpy.sqrt(kz_2**2 - 4*kz_4*kz_0))/2.
-
-    return [numpy.sqrt(kz2_1), -numpy.sqrt(kz2_1), numpy.sqrt(kz2_2), -numpy.sqrt(kz2_2)]
+    k_z1 = mod_kz_ord
+    k_z2 = -mod_kz_ord
+    k_z3 = mod_kz_extraord
+    k_z4 = -mod_kz_extraord
+    return [k_z1, k_z2, k_z3, k_z4]
 
 
 def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])):
     mu = 1.
     c = 299792458.  # m/c
 
-    #
-    # Solve for eigenmodes
-    #   Solve quartic equation A*kz**4 + B*kz**3 + C*kz**2 + D*kz + E
-    #   Coefficients from Determinant of matrix
-    #   [(w/c)**2 * E + inner(k, k) * I + outer(k, k)]
-
-    # For now optic axis should be aligned to main axes
-    assert numpy.allclose(opticAxis, [0, 0, 1]) \
-           or numpy.allclose(opticAxis, [0, 1, 0]) \
-           or numpy.allclose(opticAxis, [1, 0, 0])
-    # In general, as long as k-vector and optic axis are not colinear, this should work
-    if opticAxis[0] != 0:
-        gamma = solve_axially_aligned_eigenmodes(e_e, e_o, e_o, w, kx, ky)
-    elif opticAxis[1] != 0:
-        gamma = solve_axially_aligned_eigenmodes(e_o, e_e, e_o, w, kx, ky)
-    elif opticAxis[2] != 0:
-        gamma = solve_axially_aligned_eigenmodes(e_o, e_o, e_e, w, kx, ky)
-    k = [numpy.asarray([kx, ky, g]) for g in gamma]
-
-    #[print("kz:", kz) for kz in gamma]
-
-    #
-    # Build polarization vectors
-    #
+    gamma = build_uniaxial_transmitted_wavevectors(e_o, e_e, w, kx, ky, opticAxis)
+    k = [[kx, ky, g] for g in gamma]
 
     p = axially_aligned_uniaxial_polarizations(w, e_o, e_e, kx, ky, gamma, opticAxis)
-    #[print("P:", pi) for pi in p]
-
-    #print([(ki, pi) for ki, pi in zip(k, p)])
 
     q = [(c/(w*mu))*numpy.cross(ki, pi) for ki, pi in zip(k, p)]
-    #[print("Q:", qi) for qi in q]
 
-    # return p, gamma, Eps
-
-    #
-    # Tests
-    #
-    # vec = numpy.dot(Eps, p[0])
-    # print( numpy.dot(vec, [kx, ky, gamma[0]]) )
-    #
-    #
-    #
-
-    #
-    # Build boundary transition matrix
-    #
+    D_0 = isotropicTransferMatrix.build_vacuum_matrix(w, kx, ky)
     D = numpy.asarray(
         [
             [p[0][0], p[1][0], p[2][0], p[3][0]],
@@ -116,6 +85,10 @@ def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])
     #
     # Multiply matricies
     #
-    LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
+    #
+    # Multiply matricies
+    #
+    LayerMatrix = numpy.linalg.inv(D_0)
+    LayerMatrix = numpy.dot(LayerMatrix, numpy.dot(numpy.dot(D, P), numpy.dot(numpy.linalg.inv(D), D_0)))
     #return LayerMatrix
-    return D
+    return numpy.dot(numpy.linalg.inv(D_0), D)
