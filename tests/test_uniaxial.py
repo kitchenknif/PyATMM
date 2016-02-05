@@ -27,6 +27,17 @@ d_m = d_nm * 10**-9
 
 
 
+refl_p = []
+refl_s = []
+for i in ran_l:
+    B = tm.TransferMatrix.layer(n_1, d_nm, i*10**9, 0, tm.Polarization.s)
+    C = tm.TransferMatrix.layer(n_2, d_nm, i*10**9, 0, tm.Polarization.p)
+    M = scipy.linalg.block_diag(B.matrix, C.matrix)
+    r_ss, r_sp, r_ps, r_pp, t_ss, t_sp, t_ps, t_pp = solve_transfer_matrix(M)
+    refl_p.append(np.abs(r_pp**2))
+    refl_s.append(np.abs(r_ss**2))
+
+
 a_refl_p = []
 a_refl_s = []
 for w in ran_w:
@@ -46,6 +57,11 @@ for w in ran_w:
 plt.plot(ran_l*10**9, a_refl_p)
 plt.plot(ran_l*10**9, a_refl_s)
 #plt.plot(ran_l*10**9, sum)
+
+#PyTMM
+plt.plot(ran_l*10**9, refl_p, 'o')
+plt.plot(ran_l*10**9, refl_s, 'o')
+
 
 
 plt.xlabel("Wavelength, nm")

@@ -51,7 +51,7 @@ def build_isotropic_dynamic_matrix(eps, w, kx, ky):
     mu = 1.
     c = 299792458.  # m/c
 
-    mod_kz = numpy.sqrt(eps*(w/c)**2 - kx**2 - ky**2)
+    mod_kz = numpy.sqrt(eps*(w/c)**2 - kx**2 - ky**2, dtype=numpy.complex128)
     gamma = [mod_kz, -mod_kz, mod_kz, -mod_kz]
     k = [numpy.asarray([kx, ky, g]) for g in gamma]
 
