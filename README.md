@@ -1,6 +1,6 @@
 # PyATMM: Generalized transfer matrix method
 
-## Docuementation
+## Documentation
 Hosted on Github pages: [PyATMM](https://kitchenknif.github.io/PyATMM)
 
 ## References
