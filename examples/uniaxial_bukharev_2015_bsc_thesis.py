@@ -1,17 +1,18 @@
-__author__ = 'Pavel Dmitriev'
-
 import numpy as np
 import matplotlib.pyplot as plt
-from uniaxialTransferMatrix import *
-from isotropicTransferMatrix import *
-from transferMatrix import solve_transfer_matrix
-import scipy.linalg
+from PyATMM.uniaxialTransferMatrix import *
+from PyATMM.isotropicTransferMatrix import *
+from PyATMM.transferMatrix import solve_transfer_matrix
 
+__author__ = 'Pavel Dmitriev'
+
+#
+# Setup
+#
 c = 299792458  # m/c
 
 w = 500 * 10 **12
 l = 2*np.pi*c / w
-#ran_kx = np.linspace(0, (w/c)*0.99, 100, endpoint=False)
 
 angle = np.linspace(0, 90, 500, endpoint=False)
 ran_kx = (w/c) * np.sin(np.deg2rad(angle))
@@ -37,7 +38,6 @@ a_refl_sp = []
 
 for kx in ran_kx:
     D_0 = build_isotropic_dynamic_matrix(eps_g, w, n_g*kx, ky)
-    #D_1 = build_isotropic_dynamic_matrix(eps_ex, w, n_g*kx, ky)
     D_1 = build_uniaxial_dynamic_matrix(eps_ord, eps_ex, w, n_g*kx, ky, opticAxis=([0, 1./np.sqrt(2), 1./np.sqrt(2)]))
     D = np.dot(np.linalg.inv(D_0), D_1)
 
@@ -64,5 +64,5 @@ plt.legend(['SS', 'SP', 'Sum'], loc='best')
 
 plt.xlabel("angle, degrees")
 plt.ylabel("Reflectance")
-#plt.title("Reflectance of ideal single-layer antireflective coating")
+plt.title("Uniaxial total internal reflection")
 plt.show(block=True)

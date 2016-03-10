@@ -1,12 +1,17 @@
-__author__ = 'Pavel Dmitriev'
-
 import numpy as np
 import matplotlib.pyplot as plt
-from isotropicTransferMatrix import *
-from transferMatrix import solve_transfer_matrix
-import PyTMM.pytmm.transferMatrix as tm
 import scipy.linalg
 
+import PyTMM.transferMatrix as tm
+
+from PyATMM.isotropicTransferMatrix import *
+from PyATMM.transferMatrix import solve_transfer_matrix
+
+__author__ = 'Pavel Dmitriev'
+
+#
+# Setup
+#
 c = 299792458  # m/c
 
 w = 500 * 10 **12
@@ -22,9 +27,12 @@ n_2 = np.sqrt(eps_2)
 
 ky = 0
 
+
+#
+# PyTMM
+#
 refl_p = []
 refl_s = []
-
 for kx in ran_kx:
     B = tm.TransferMatrix.boundingLayer(n_1, n_2, np.arcsin(kx*c/w), tm.Polarization.s)
     C = tm.TransferMatrix.boundingLayer(n_1, n_2, np.arcsin(kx*c/w), tm.Polarization.p)
@@ -35,6 +43,10 @@ for kx in ran_kx:
     refl_p.append(np.abs(r_pp**2))
     refl_s.append(np.abs(r_ss**2))
 
+
+#
+# PyATMM
+#
 a_refl_p = []
 a_refl_s = []
 for kx in ran_kx:
@@ -55,6 +67,6 @@ plt.plot(angle, a_refl_s)
 
 plt.xlabel("angle, degrees")
 plt.ylabel("Reflectance")
-#plt.title("Reflectance of ideal single-layer antireflective coating")
+plt.title("Total internal reflection")
 plt.legend(['PP', 'SS', 'P', 'S'], loc='best')
 plt.show(block=True)
