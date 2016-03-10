@@ -14,8 +14,11 @@ l = 2*np.pi*c / w
 angle = np.linspace(0, 90, 200, endpoint=False)
 ran_kx = (w/c) * np.sin(np.deg2rad(angle))
 
-eps_1 = 2.25
+eps_1 = 6.7
 n_1 = np.sqrt(eps_1)
+
+eps_2 = 4.41
+n_2 = np.sqrt(eps_2)
 
 ky = 0
 
@@ -23,8 +26,8 @@ refl_p = []
 refl_s = []
 
 for kx in ran_kx:
-    B = tm.TransferMatrix.boundingLayer(n_1, 1, np.arcsin(kx*c/w), tm.Polarization.s)
-    C = tm.TransferMatrix.boundingLayer(n_1, 1, np.arcsin(kx*c/w), tm.Polarization.p)
+    B = tm.TransferMatrix.boundingLayer(n_1, n_2, np.arcsin(kx*c/w), tm.Polarization.s)
+    C = tm.TransferMatrix.boundingLayer(n_1, n_2, np.arcsin(kx*c/w), tm.Polarization.p)
     #a.appendRight(b)
 
     M = scipy.linalg.block_diag(B.matrix, C.matrix)
@@ -36,7 +39,7 @@ a_refl_p = []
 a_refl_s = []
 for kx in ran_kx:
     D_0 = build_isotropic_dynamic_matrix(eps_1, w, n_1*kx, ky)
-    D_1 = build_isotropic_dynamic_matrix(1, w, n_1*kx, ky)
+    D_1 = build_isotropic_dynamic_matrix(eps_2, w, n_1*kx, ky)
     D = np.dot(np.linalg.inv(D_0), D_1)
     r_ss, r_sp, r_ps, r_pp, t_ss, t_sp, t_ps, t_pp = solve_transfer_matrix(D)
     a_refl_p.append(np.abs(r_pp**2))

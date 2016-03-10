@@ -2,7 +2,7 @@ __author__ = 'Pavel Dmitriev'
 
 import numpy
 import numpy.linalg
-import isotropicTransferMatrix
+import PyATMM.isotropicTransferMatrix as isotropicTransferMatrix
 
 def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])):
     D = build_uniaxial_bounding_layer_matrix(e_o, e_e, w, kx, ky, opticAxis=opticAxis)

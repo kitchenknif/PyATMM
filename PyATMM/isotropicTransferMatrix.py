@@ -2,7 +2,7 @@ __author__ = 'Pavel Dmitriev'
 
 import numpy
 import numpy.linalg
-from transferMatrix import *
+from PyATMM.transferMatrix import *
 
 
 def build_isotropic_layer_matrix(eps, w, kx, ky, d):
@@ -33,7 +33,7 @@ def build_isotropic_propagation_matrix(eps, w, kx, ky, d):
     mu = 1.
     c = 299792458.  # m/c
 
-    mod_kz = numpy.sqrt(eps*(w/c)**2 - kx**2 - ky**2)
+    mod_kz = numpy.sqrt(eps*(w/c)**2 - kx**2 - ky**2, dtype=numpy.complex128)
     gamma = [mod_kz, -mod_kz, mod_kz, -mod_kz]
 
     P = numpy.asarray(
@@ -76,11 +76,39 @@ def build_isotropic_dynamic_matrix(eps, w, kx, ky):
 
 
 def isotropic_polarizations(w, eps, kx, ky, kz):
-    p_1 = [-kz[0], 0, kx]
-    p_2 = [-kz[1], 0, kx]
-    p_3 = [0, -kz[2], ky]
-    p_4 = [0, -kz[3], ky]
+    k = [[kx, ky, ki] for ki in kz]
+
+    # TODO
+    # K-vector aligned
+    # k = [kx, ky, kz]
+    #
+    if not numpy.isclose(kx, 0) or not numpy.isclose(ky, 0):
+        p_3 = numpy.cross(k[2], [-kx, -ky, kz[2]])
+        p_4 = numpy.cross(k[3], [-kx, -ky, kz[3]])
+
+        p_1 = numpy.cross(k[0], [-kx, -ky, kz[0]])
+        p_1 = numpy.cross(k[0], p_1)
+
+        p_2 = numpy.cross(k[1], [-kx, -ky, kz[1]])
+        p_2 = numpy.cross(k[1], p_2)
+    else:
+        # Axially aligned
+        p_1 = [-kz[0], 0, kx]
+        p_2 = [-kz[1], 0, kx]
+        p_3 = [0, -kz[2], ky]
+        p_4 = [0, -kz[3], ky]
+
+    # p_1 = [-kz[0], 0, kx]
+    # p_2 = [-kz[1], 0, kx]
+    # p_3 = [0, -kz[2], ky]
+    # p_4 = [0, -kz[3], ky]
 
     p = [p_1, p_2, p_3, p_4]
     p = [numpy.divide(pi, numpy.sqrt(numpy.dot(pi, pi))) for pi in p]
+
+    assert numpy.isclose(numpy.dot(p[0], k[0]), 0)
+    assert numpy.isclose(numpy.dot(p[1], k[1]), 0)
+    assert numpy.isclose(numpy.dot(p[2], k[2]), 0)
+    assert numpy.isclose(numpy.dot(p[3], k[3]), 0)
+
     return p
