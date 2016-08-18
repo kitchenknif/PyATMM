@@ -106,9 +106,16 @@ def isotropic_polarizations(w, eps, kx, ky, kz):
     p = [p_1, p_2, p_3, p_4]
     p = [numpy.divide(pi, numpy.sqrt(numpy.dot(pi, pi))) for pi in p]
 
-    assert numpy.isclose(numpy.dot(p[0], k[0]), 0)
-    assert numpy.isclose(numpy.dot(p[1], k[1]), 0)
-    assert numpy.isclose(numpy.dot(p[2], k[2]), 0)
-    assert numpy.isclose(numpy.dot(p[3], k[3]), 0)
+    if not numpy.isclose(numpy.dot(p[0], k[0]), 0+0j) \
+        or not numpy.isclose(numpy.dot(p[1], k[1]), 0+0j) \
+        or not numpy.isclose(numpy.dot(p[2], k[2]), 0 + 0j) \
+        or not numpy.isclose(numpy.dot(p[3], k[3]), 0 + 0j):
+
+        print("ALYARMA")
+
+    #assert numpy.isclose(numpy.dot(p[0], k[0]), 0+0j)
+    #assert numpy.isclose(numpy.dot(p[1], k[1]), 0+0j)
+    #assert numpy.isclose(numpy.dot(p[2], k[2]), 0+0j)
+    #assert numpy.isclose(numpy.dot(p[3], k[3]), 0+0j)
 
     return p
