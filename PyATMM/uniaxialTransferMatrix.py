@@ -8,8 +8,6 @@ def build_uniaxial_layer_matrix(e_o, e_e, w, kx, ky, d, opticAxis=([0., 1., 0.])
     D = build_uniaxial_bounding_layer_matrix(e_o, e_e, w, kx, ky, opticAxis=opticAxis)
     P = build_uniaxial_propagation_matrix(e_o, e_e, w, kx, ky, d, opticAxis=opticAxis)
 
-    #LayerMatrix = numpy.dot(numpy.linalg.inv(D_0), numpy.dot(numpy.dot(D, P), numpy.dot(numpy.linalg.inv(D), D_0)))
-
     LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
     return LayerMatrix
 
@@ -65,6 +63,7 @@ def axially_aligned_uniaxial_polarizations(e_o, e_e, w, kx, ky, kz, opticAxis):
     #       or numpy.allclose(opticAxis, [0, 1, 0]) \
     #       or numpy.allclose(opticAxis, [1, 0, 0])
     # In general, as long as k-vector and optic axis are not colinear, this should work
+
     assert all(not numpy.allclose(opticAxis, [kx, ky, numpy.abs(g)]) for g in kz)
     assert numpy.isclose(numpy.dot(opticAxis, opticAxis), 1.)
 
@@ -108,7 +107,6 @@ def build_uniaxial_transmitted_wavevectors(e_o, e_e, w, kx, ky, opticAxis=([0., 
                                                             - k_par**2 * (1 + nu * (la**2 + na**2)),
                                                             dtype=numpy.complex128)
                                                )
-
 
     k_z1 = mod_kz_ord
     k_z2 = -mod_kz_ord

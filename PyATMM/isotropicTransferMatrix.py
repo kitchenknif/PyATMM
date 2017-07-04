@@ -2,19 +2,15 @@ __author__ = 'Pavel Dmitriev'
 
 import numpy
 import numpy.linalg
-from PyATMM.transferMatrix import *
 
 
 def build_isotropic_layer_matrix(eps, w, kx, ky, d):
-    #D_0 = build_isotropic_dynamic_matrix(1, w, kx, ky)
-    #D = build_isotropic_dynamic_matrix(eps, w, kx, ky)
     D = build_isotropic_bounding_layer_matrix(eps, w, kx, ky)
     P = build_isotropic_propagation_matrix(eps, w, kx, ky, d)
 
-    #LayerMatrix = numpy.dot(numpy.linalg.inv(D_0), numpy.dot(numpy.dot(D, P), numpy.dot(numpy.linalg.inv(D), D_0)))
-
     LayerMatrix = numpy.dot(D, numpy.dot(P, numpy.linalg.inv(D)))
     return LayerMatrix
+
 
 def build_isotropic_bounding_layer_matrix(eps, w, kx, ky):
     #
@@ -106,12 +102,12 @@ def isotropic_polarizations(w, eps, kx, ky, kz):
     p = [p_1, p_2, p_3, p_4]
     p = [numpy.divide(pi, numpy.sqrt(numpy.dot(pi, pi))) for pi in p]
 
-    if not numpy.isclose(numpy.dot(p[0], k[0]), 0+0j) \
-        or not numpy.isclose(numpy.dot(p[1], k[1]), 0+0j) \
+    if not numpy.isclose(numpy.dot(p[0], k[0]), 0 + 0j) \
+        or not numpy.isclose(numpy.dot(p[1], k[1]), 0 + 0j) \
         or not numpy.isclose(numpy.dot(p[2], k[2]), 0 + 0j) \
         or not numpy.isclose(numpy.dot(p[3], k[3]), 0 + 0j):
 
-        print("ALYARMA")
+        print("polarization not normal to k-vector")
 
     #assert numpy.isclose(numpy.dot(p[0], k[0]), 0+0j)
     #assert numpy.isclose(numpy.dot(p[1], k[1]), 0+0j)
