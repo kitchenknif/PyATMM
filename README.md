@@ -1,4 +1,6 @@
 # PyATMM: Generalized transfer matrix method
+## Citing
+[![DOI](https://zenodo.org/badge/44310723.svg)](https://zenodo.org/badge/latestdoi/44310723)
 
 ## Documentation
 Hosted on Github pages: [PyATMM](https://kitchenknif.github.io/PyATMM)
